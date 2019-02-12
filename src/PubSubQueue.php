@@ -63,7 +63,7 @@ class PubSubQueue extends Queue implements QueueContract
      */
     public function push($job, $data = '', $queue = null)
     {
-        return $this->pushRaw($this->createPayload($job, $this->getQueue($queue), $data), $queue);
+        return $this->pushRaw($this->createPayload($job, $data), $queue);
     }
 
     /**
@@ -107,7 +107,7 @@ class PubSubQueue extends Queue implements QueueContract
     public function later($delay, $job, $data = '', $queue = null)
     {
         return $this->pushRaw(
-            $this->createPayload($job, $this->getQueue($queue), $data),
+            $this->createPayload($job, $data),
             $queue,
             ['available_at' => $this->availableAt($delay)]
         );
@@ -158,7 +158,7 @@ class PubSubQueue extends Queue implements QueueContract
         $payloads = [];
 
         foreach ((array) $jobs as $job) {
-            $payloads[] = ['data' => $this->createPayload($job, $this->getQueue($queue), $data)];
+            $payloads[] = ['data' => $this->createPayload($job, $data)];
         }
 
         $topic = $this->getTopic($this->getQueue($queue), true);
@@ -215,9 +215,9 @@ class PubSubQueue extends Queue implements QueueContract
      *
      * @throws \Illuminate\Queue\InvalidPayloadException
      */
-    protected function createPayload($job, $queue, $data = '')
+    protected function createPayload($job, $data = '')
     {
-        $payload = parent::createPayload($job, $this->getQueue($queue), $data);
+        $payload = parent::createPayload($job, $data);
 
         return base64_encode($payload);
     }
@@ -230,9 +230,9 @@ class PubSubQueue extends Queue implements QueueContract
      * @param  mixed  $data
      * @return array
      */
-    protected function createPayloadArray($job, $queue, $data = '')
+    protected function createPayloadArray($job, $data = '')
     {
-        return array_merge(parent::createPayloadArray($job, $this->getQueue($queue), $data), [
+        return array_merge(parent::createPayloadArray($job, $data), [
             'id' => $this->getRandomId(),
         ]);
     }
