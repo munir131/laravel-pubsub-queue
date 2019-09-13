@@ -30,11 +30,12 @@ class PubSubQueueTests extends TestCase
         $this->subscription = $this->createMock(Subscription::class);
         $this->message = $this->createMock(Message::class);
         $this->config = [
-            'queue' => 'test',
+            'queue' => 'test_pub',
             'project_id' => 'the-project-id',
             'retries' => 1,
             'request_timeout' => 60,
             'subscribers' => [
+                'test_sub' => 'test_pub',
                 'sub1' => 'topic1',
                 'sub2' => 'topic2',
                 'sub3' => 'topic1',
@@ -45,6 +46,7 @@ class PubSubQueueTests extends TestCase
             ->setMethods([
                 'pushRaw',
                 'getTopic',
+                'getTopicFromSubscriber',
                 'exists',
                 'subscription',
                 'availableAt',
@@ -101,6 +103,7 @@ class PubSubQueueTests extends TestCase
         $job = 'test';
         $delay = 60;
         $delay_timestamp = Carbon::now()->addSeconds($delay)->getTimestamp();
+        $delay_timestamp_str = (string) $delay_timestamp;
 
         $this->queue->method('availableAt')
             ->willReturn($delay_timestamp);
@@ -111,8 +114,8 @@ class PubSubQueueTests extends TestCase
             ->with(
                 $this->isType('string'),
                 $this->anything(),
-                $this->callback(function ($options) use ($delay_timestamp) {
-                    if (! isset($options['available_at']) || $options['available_at'] !== $delay_timestamp) {
+                $this->callback(function ($options) use ($delay_timestamp_str) {
+                    if (! isset($options['available_at']) || $options['available_at'] !== $delay_timestamp_str) {
                         return false;
                     }
 
@@ -137,9 +140,12 @@ class PubSubQueueTests extends TestCase
         $this->queue->method('getTopic')
             ->willReturn($this->topic);
 
+        $this->queue->method('getTopicFromSubscriber')
+            ->willReturn($this->topic);
+
         $this->queue->setContainer($this->createMock(Container::class));
 
-        $this->assertTrue($this->queue->pop('test') instanceof PubSubJob);
+        $this->assertTrue($this->queue->pop('test_sub') instanceof PubSubJob);
     }
 
     public function testPopWhenNoJobAvailable()
@@ -156,7 +162,10 @@ class PubSubQueueTests extends TestCase
         $this->queue->method('getTopic')
             ->willReturn($this->topic);
 
-        $this->assertTrue(is_null($this->queue->pop('test')));
+        $this->queue->method('getTopicFromSubscriber')
+            ->willReturn($this->topic);
+
+        $this->assertTrue(is_null($this->queue->pop('test_sub')));
     }
 
     public function testPopWhenTopicDoesNotExist()
@@ -167,7 +176,13 @@ class PubSubQueueTests extends TestCase
         $this->topic->method('exists')
             ->willReturn(false);
 
-        $this->assertTrue(is_null($this->queue->pop('test')));
+        $this->queue->method('getTopicFromSubscriber')
+            ->willReturn($this->topic);
+
+        $this->topic->method('subscription')
+            ->willReturn($this->subscription);
+
+        $this->assertTrue(is_null($this->queue->pop('test_sub')));
     }
 
     public function testBulk()
@@ -177,6 +192,9 @@ class PubSubQueueTests extends TestCase
             ->willReturn($this->result);
 
         $this->queue->method('getTopic')
+            ->willReturn($this->topic);
+
+        $this->queue->method('getTopicFromSubscriber')
             ->willReturn($this->topic);
 
         $this->queue->method('subscribeToTopic')
@@ -204,6 +222,7 @@ class PubSubQueueTests extends TestCase
         $options = ['foo' => 'bar'];
         $delay = 60;
         $delay_timestamp = Carbon::now()->addSeconds($delay)->getTimestamp();
+        $delay_timestamp_str = (string) $delay_timestamp;
 
         $this->subscription->expects($this->once())
             ->method('acknowledge');
@@ -221,12 +240,12 @@ class PubSubQueueTests extends TestCase
             ->method('publish')
             ->willReturn($this->result)
             ->with(
-                $this->callback(function ($message) use ($options, $delay_timestamp) {
+                $this->callback(function ($message) use ($options, $delay_timestamp_str) {
                     if (! isset($message['attributes'])) {
                         return false;
                     }
 
-                    if (! isset($message['attributes']['available_at']) || $message['attributes']['available_at'] !== $delay_timestamp) {
+                    if (! isset($message['attributes']['available_at']) || $message['attributes']['available_at'] !== $delay_timestamp_str) {
                         return false;
                     }
 
@@ -255,26 +274,6 @@ class PubSubQueueTests extends TestCase
             ->getMock();
 
         $this->assertTrue($queue->getTopic('test') instanceof Topic);
-    }
-
-    public function testCreateTopicAndReturnIt()
-    {
-        $this->topic->method('exists')
-            ->willReturn(false);
-
-        $this->topic->expects($this->once())
-            ->method('create')
-            ->willReturn(true);
-
-        $this->client->method('topic')
-            ->willReturn($this->topic);
-
-        $queue = $this->getMockBuilder(PubSubQueue::class)
-            ->setConstructorArgs([$this->client, 'default', $this->config])
-            ->setMethods()
-            ->getMock();
-
-        $this->assertTrue($queue->getTopic('test', true) instanceof Topic);
     }
 
     public function testSubscribtionIsCreated()

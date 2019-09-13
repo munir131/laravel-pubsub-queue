@@ -113,9 +113,9 @@ class PubSubQueue extends Queue implements QueueContract
      *
      * @return array
      */
-    public function pushRaw($payload, $subscriber = null, array $options = [])
+    public function pushRaw($payload, $topic = null, array $options = [])
     {
-        $topic = $this->getTopic($subscriber, true);
+        $topic = $this->getTopic($topic);
 
         $publish = ['data' => $payload];
 
@@ -158,8 +158,7 @@ class PubSubQueue extends Queue implements QueueContract
     public function pop($subscriber = null)
     {
         $this->subscriber = $subscriber;
-        $topic = $this->getTopic($this->getQueue($subscriber));
-
+        $topic = $this->getTopicFromSubscriber($subscriber);
         $subscription = $topic->subscription($subscriber);
         $messages = $subscription->pull([
             'returnImmediately' => true,
@@ -220,12 +219,13 @@ class PubSubQueue extends Queue implements QueueContract
      *
      * @return mixed
      */
-    public function acknowledgeAndPublish(Message $message, $queue = null, $options = [], $delay = 0)
+    public function acknowledgeAndPublish(Message $message, $topic = null, $options = [], $delay = 0)
     {
         if (isset($options['attempts'])) {
             $options['attempts'] = (string) $options['attempts'];
         }
-        $topic = $this->getTopic($this->getQueue($queue));
+        $topic = $this->getTopic($topic);
+
         $subscription = $topic->subscription($this->subscriber);
 
         $subscription->acknowledge($message);
@@ -276,13 +276,26 @@ class PubSubQueue extends Queue implements QueueContract
      * Get the current topic.
      *
      * @param  string $queue
-     * @param  string $create
      *
      * @return \Google\Cloud\PubSub\Topic
      */
-    public function getTopic($queue, $create = false)
+    public function getTopic($topic)
     {
-        $queue = $this->getQueue($queue);
+        $topic = $this->pubsub->topic($topic);
+
+        return $topic;
+    }
+
+    /**
+     * Get the current topic from subscriber.
+     *
+     * @param  string $queue
+     *
+     * @return \Google\Cloud\PubSub\Topic
+     */
+    public function getTopicFromSubscriber($subscriber)
+    {
+        $queue = $this->getQueue($subscriber);
         $topic = $this->pubsub->topic($queue);
 
         return $topic;
@@ -330,10 +343,10 @@ class PubSubQueue extends Queue implements QueueContract
      * @param  string|null  $queue
      * @return string
      */
-    public function getQueue($queue)
+    public function getQueue($subscriberName)
     {
-        if ($this->config && $this->config['subscribers'] && $queue && isset($this->config['subscribers'][$queue])) {
-            return $this->config['subscribers'][$queue];
+        if ($this->config && $this->config['subscribers'] && $subscriberName && isset($this->config['subscribers'][$subscriberName])) {
+            return $this->config['subscribers'][$subscriberName];
         }
         return $this->default;
     }

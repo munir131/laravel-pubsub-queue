@@ -29,10 +29,16 @@ class PubSubConnectorTests extends TestCase
     private function createFakeConfig()
     {
         return [
-            'queue' => 'test',
+            'queue' => 'test_pub',
             'project_id' => 'the-project-id',
             'retries' => 1,
             'request_timeout' => 60,
+            'subscribers' => [
+                'test_sub' => 'test_pub',
+                'sub1' => 'topic1',
+                'sub2' => 'topic2',
+                'sub3' => 'topic1',
+            ]
         ];
     }
 }
