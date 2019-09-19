@@ -8,9 +8,9 @@ use Google\Cloud\PubSub\Topic;
 use PHPUnit\Framework\TestCase;
 use Google\Cloud\PubSub\Message;
 use Illuminate\Container\Container;
+use PubSub\PubSubQueue\PubSubQueue;
 use Google\Cloud\PubSub\PubSubClient;
 use Google\Cloud\PubSub\Subscription;
-use PubSub\PubSubQueue\PubSubQueue;
 use PubSub\PubSubQueue\Jobs\PubSubJob;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 
@@ -38,7 +38,7 @@ class PubSubQueueTests extends TestCase
                 'sub1' => 'topic1',
                 'sub2' => 'topic2',
                 'sub3' => 'topic1',
-            ]
+            ],
         ];
         $this->queue = $this->getMockBuilder(PubSubQueue::class)
             ->setConstructorArgs([$this->client, 'default', $this->config])
@@ -69,6 +69,7 @@ class PubSubQueueTests extends TestCase
             ->willReturn($this->result)
             ->with($this->callback(function ($payload) use ($job, $data) {
                 $decoded_payload = json_decode($payload, true);
+
                 return $decoded_payload['data'] === $data && $decoded_payload['job'] === $job;
             }));
 

@@ -5,8 +5,8 @@ namespace PubSub\PubSubQueue\Tests\Unit\Connectors;
 use ReflectionClass;
 use PHPUnit\Framework\TestCase;
 use PubSub\PubSubQueue\PubSubQueue;
-use Illuminate\Queue\Connectors\ConnectorInterface;
 use PubSub\PubSubQueue\Connectors\PubSubConnector;
+use Illuminate\Queue\Connectors\ConnectorInterface;
 
 class PubSubConnectorTests extends TestCase
 {

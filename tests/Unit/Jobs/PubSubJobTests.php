@@ -6,8 +6,8 @@ use ReflectionClass;
 use PHPUnit\Framework\TestCase;
 use Google\Cloud\PubSub\Message;
 use Illuminate\Container\Container;
-use Google\Cloud\PubSub\PubSubClient;
 use PubSub\PubSubQueue\PubSubQueue;
+use Google\Cloud\PubSub\PubSubClient;
 use PubSub\PubSubQueue\Jobs\PubSubJob;
 use Illuminate\Contracts\Queue\Job as JobContract;
 

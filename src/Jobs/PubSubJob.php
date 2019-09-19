@@ -2,11 +2,11 @@
 
 namespace PubSub\PubSubQueue\Jobs;
 
+use Illuminate\Queue\Jobs\Job;
 use Google\Cloud\PubSub\Message;
 use Illuminate\Container\Container;
-use Illuminate\Contracts\Queue\Job as JobContract;
-use Illuminate\Queue\Jobs\Job;
 use PubSub\PubSubQueue\PubSubQueue;
+use Illuminate\Contracts\Queue\Job as JobContract;
 
 class PubSubJob extends Job implements JobContract
 {
@@ -25,7 +25,7 @@ class PubSubJob extends Job implements JobContract
     protected $job;
 
     /**
-     * subscriber name
+     * subscriber name.
      *
      * @var string
      */
@@ -74,6 +74,7 @@ class PubSubJob extends Job implements JobContract
                 $this->pubsub->getHandler($this->subscriber)
             );
         }
+
         return base64_decode($this->job->data());
     }
 
@@ -84,12 +85,12 @@ class PubSubJob extends Job implements JobContract
      */
     private function modifyPayload($payload, $class)
     {
-        if (!is_array($payload)) {
+        if (! is_array($payload)) {
             $payload = json_decode($payload, true);
         }
 
         $body = [
-            'job' => $class . '@handle',
+            'job' => $class.'@handle',
             'data' => $payload,
         ];
 

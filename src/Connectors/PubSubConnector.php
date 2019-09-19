@@ -2,8 +2,8 @@
 
 namespace PubSub\PubSubQueue\Connectors;
 
-use Google\Cloud\PubSub\PubSubClient;
 use PubSub\PubSubQueue\PubSubQueue;
+use Google\Cloud\PubSub\PubSubClient;
 use Illuminate\Queue\Connectors\ConnectorInterface;
 
 class PubSubConnector implements ConnectorInterface
@@ -24,6 +24,7 @@ class PubSubConnector implements ConnectorInterface
     public function connect(array $config)
     {
         $gcp_config = $this->transformConfig($config);
+
         return new PubSubQueue(
             new PubSubClient($gcp_config),
             $config['queue'] ?? $this->default_queue,

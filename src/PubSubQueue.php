@@ -2,13 +2,13 @@
 
 namespace PubSub\PubSubQueue;
 
-use Google\Cloud\PubSub\Message;
-use Google\Cloud\PubSub\PubSubClient;
-use Google\Cloud\PubSub\Topic;
-use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue;
 use Illuminate\Support\Str;
+use Google\Cloud\PubSub\Topic;
+use Google\Cloud\PubSub\Message;
+use Google\Cloud\PubSub\PubSubClient;
 use PubSub\PubSubQueue\Jobs\PubSubJob;
+use Illuminate\Contracts\Queue\Queue as QueueContract;
 
 class PubSubQueue extends Queue implements QueueContract
 {
@@ -27,12 +27,12 @@ class PubSubQueue extends Queue implements QueueContract
     protected $default;
 
     /**
-     * PubSub config
+     * PubSub config.
      */
     protected $config;
 
     /**
-     * Subscriber name
+     * Subscriber name.
      */
     protected $subscriber;
 
@@ -64,7 +64,7 @@ class PubSubQueue extends Queue implements QueueContract
     }
 
     /**
-     * Check whether handler exist
+     * Check whether handler exist.
      *
      * @param  string  $queue
      *
@@ -75,11 +75,12 @@ class PubSubQueue extends Queue implements QueueContract
         if (array_key_exists('plainHandlers', $this->config)) {
             return array_key_exists($subscriber, $this->config['plainHandlers']);
         }
+
         return false;
     }
 
     /**
-     * Check whether handler exist
+     * Check whether handler exist.
      *
      * @param  string  $queue
      *
@@ -120,7 +121,7 @@ class PubSubQueue extends Queue implements QueueContract
         $topic = $this->getTopicUsingSubscriber($subscriberName);
         $publish = ['data' => $payload];
 
-        if (!empty($options)) {
+        if (! empty($options)) {
             $publish['attributes'] = $options;
         }
 
@@ -166,7 +167,7 @@ class PubSubQueue extends Queue implements QueueContract
             'maxMessages' => 1,
         ]);
 
-        if (!empty($messages) && count($messages) > 0) {
+        if (! empty($messages) && count($messages) > 0) {
             return new PubSubJob(
                 $this->container,
                 $this,
@@ -347,6 +348,7 @@ class PubSubQueue extends Queue implements QueueContract
         if ($this->config && $this->config['subscribers'] && $queue && isset($this->config['subscribers'][$queue])) {
             return $this->config['subscribers'][$queue];
         }
+
         return $this->default;
     }
 
