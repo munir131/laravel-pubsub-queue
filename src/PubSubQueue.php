@@ -165,6 +165,7 @@ class PubSubQueue extends Queue implements QueueContract
             'returnImmediately' => true,
             'maxMessages' => 1,
         ]);
+        $messages = $this->checkAvailabilty($messages);
 
         if (!empty($messages) && count($messages) > 0) {
             return new PubSubJob(
@@ -175,6 +176,18 @@ class PubSubQueue extends Queue implements QueueContract
                 $subscriber,
                 $subscriber
             );
+        }
+    }
+
+    public function checkAvailabilty($messages) {
+        if (!empty($messages) && count($messages) > 0) {
+            $availableAt = $messages[0]->attribute('available_at');
+            $now = (new \DateTime('now'))->getTimestamp();
+            if (!$availableAt) {
+                return $messages;
+            } else if ($availableAt < $now) {
+                return $messages;
+            }
         }
     }
 

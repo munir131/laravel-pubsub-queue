@@ -298,4 +298,30 @@ class PubSubQueueTests extends TestCase
     {
         $this->assertTrue($this->queue->getPubSub() instanceof PubSubClient);
     }
+
+    public function testDelayedMessage()
+    {
+        $this->subscription->method('pull')
+            ->willReturn([$this->message]);
+
+        $this->message->method('attribute')
+            ->with($this->equalTo('available_at'))
+            ->willReturn((new \DateTime('now +1seconds'))->getTimestamp());
+
+        $this->topic->method('subscription')
+            ->willReturn($this->subscription);
+
+        $this->topic->method('exists')
+            ->willReturn(true);
+
+        $this->queue->method('getTopic')
+            ->willReturn($this->topic);
+
+        $this->queue->setContainer($this->createMock(Container::class));
+
+        $this->assertTrue(is_null($this->queue->pop('test')));
+        sleep(2);
+        $this->assertTrue($this->queue->pop('test') instanceof PubSubJob);
+
+    }
 }
