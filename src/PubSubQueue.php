@@ -165,6 +165,7 @@ class PubSubQueue extends Queue implements QueueContract
             'returnImmediately' => true,
             'maxMessages' => 1,
         ]);
+        $subscription->modifyAckDeadline(new Message($messages), 600);
 
         if (!empty($messages) && count($messages) > 0) {
             return new PubSubJob(
