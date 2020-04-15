@@ -39,6 +39,10 @@ You can check [Google Cloud PubSub client](http://googlecloudplatform.github.io/
                 'sub2' => 'topic2',
                 'sub3' => 'topic2' // Multiple subscriber to single topic
             ],
+            // Specify sub for which you want to increase deadline
+            'deadline' => [
+                'sub1' => 600, // provide duration that you want to increase
+            ],
             'plain_handlers' => [
                 'plain_sub' => App\Jobs\PlainClass::class // This one for non laravel format messages.
             ],
