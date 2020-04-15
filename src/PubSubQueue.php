@@ -167,7 +167,7 @@ class PubSubQueue extends Queue implements QueueContract
         ]);
         $queue = $this->getQueue($subscriber);
         if ($this->config && $this->config['subscribers'] && $queue && isset($this->config['subscribers'][$queue])) {
-            $deadline = $this->config['subscribers']['deadline'];
+            $deadline = $this->config['subscribers'][$queue]['deadline'];
             foreach($deadline as $key => $row) {
                 if($key == $queue) {
                     $subscription->modifyAckDeadline(new Message($messages), $row);
