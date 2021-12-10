@@ -16,12 +16,12 @@ use ReflectionClass;
 
 class PubSubQueueTests extends TestCase
 {
-    public function teardown()
+    public function teardown(): void
     {
         //
     }
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->result = 'message-id';
 
@@ -72,7 +72,6 @@ class PubSubQueueTests extends TestCase
                 $decoded_payload = json_decode($payload, true);
                 return $decoded_payload['data'] === $data && $decoded_payload['job'] === $job;
             }));
-
         $this->assertEquals($this->result, $this->queue->push('test', $data));
     }
 
@@ -114,7 +113,7 @@ class PubSubQueueTests extends TestCase
                 $this->isType('string'),
                 $this->anything(),
                 $this->callback(function ($options) use ($delay_timestamp_string) {
-                    if (!isset($options['available_at']) || $options['available_at'] !== $delay_timestamp_string) {
+                    if (! isset($options['available_at']) || $options['available_at'] !== $delay_timestamp_string) {
                         return false;
                     }
 
@@ -225,15 +224,15 @@ class PubSubQueueTests extends TestCase
             ->willReturn($this->result)
             ->with(
                 $this->callback(function ($message) use ($options, $delay_timestamp_string) {
-                    if (!isset($message['attributes'])) {
+                    if (! isset($message['attributes'])) {
                         return false;
                     }
 
-                    if (!isset($message['attributes']['available_at']) || $message['attributes']['available_at'] !== $delay_timestamp_string) {
+                    if (! isset($message['attributes']['available_at']) || $message['attributes']['available_at'] !== $delay_timestamp_string) {
                         return false;
                     }
 
-                    if (!isset($message['attributes']['foo']) || $message['attributes']['foo'] != $options['foo']) {
+                    if (! isset($message['attributes']['foo']) || $message['attributes']['foo'] != $options['foo']) {
                         return false;
                     }
 
@@ -286,6 +285,7 @@ class PubSubQueueTests extends TestCase
         $this->assertTrue($queue->getQueue('sub1') === 'topic1');
 
     }
+    
     public function testSubscribtionIsCreated()
     {
         $this->topic->method('subscription')
