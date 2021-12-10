@@ -2,23 +2,23 @@
 
 namespace PubSub\PubSubQueue\Tests\Unit\Jobs;
 
-use ReflectionClass;
-use PHPUnit\Framework\TestCase;
 use Google\Cloud\PubSub\Message;
-use Illuminate\Container\Container;
 use Google\Cloud\PubSub\PubSubClient;
-use PubSub\PubSubQueue\PubSubQueue;
-use PubSub\PubSubQueue\Jobs\PubSubJob;
+use Illuminate\Container\Container;
 use Illuminate\Contracts\Queue\Job as JobContract;
+use PHPUnit\Framework\TestCase;
+use PubSub\PubSubQueue\Jobs\PubSubJob;
+use PubSub\PubSubQueue\PubSubQueue;
+use ReflectionClass;
 
 class PubSubJobTests extends TestCase
 {
-    public function teardown() : void
+    public function teardown(): void
     {
         //
     }
 
-    public function setUp() : void
+    public function setUp(): void
     {
         $this->messageId = '1234';
         $this->messageData = json_encode(['id' => $this->messageId, 'foo' => 'bar']);
