@@ -165,6 +165,15 @@ class PubSubQueue extends Queue implements QueueContract
             'returnImmediately' => true,
             'maxMessages' => 1,
         ]);
+        $queue = $this->getQueue($subscriber);
+        if ($this->config && $this->config['subscribers'] && $queue && isset($this->config['subscribers'][$queue])) {
+            $deadline = $this->config['subscribers'][$queue]['deadline'];
+            foreach($deadline as $key => $row) {
+                if($key == $queue) {
+                    $subscription->modifyAckDeadline(new Message($messages), $row);
+                }
+            }
+        }
 
         if (!empty($messages) && count($messages) > 0) {
             return new PubSubJob(
