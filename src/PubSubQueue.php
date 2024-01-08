@@ -166,7 +166,18 @@ class PubSubQueue extends Queue implements QueueContract
             'maxMessages' => 1,
         ]);
 
-        if (!empty($messages) && count($messages) > 0) {
+        if (empty($messages) || count($messages) < 1) {
+            return;
+        }
+
+        $available_at = $messages[0]->attribute('available_at');
+        if ($available_at && $available_at > time()) {
+            return;
+        }
+
+        $this->acknowledge($messages[0], $queue);
+
+        if (! empty($messages) && count($messages) > 0) {
             return new PubSubJob(
                 $this->container,
                 $this,
@@ -222,6 +233,7 @@ class PubSubQueue extends Queue implements QueueContract
      */
     public function acknowledgeAndPublish(Message $message, $subscriberName = null, $options = [], $delay = 0)
     {
+        // added republish method - not used for now
         if (isset($options['attempts'])) {
             $options['attempts'] = (string) $options['attempts'];
         }
@@ -230,6 +242,27 @@ class PubSubQueue extends Queue implements QueueContract
         $subscription = $topic->subscription($this->subscriber);
 
         $subscription->acknowledge($message);
+
+        $options = array_merge([
+            'available_at' => (string) $this->availableAt($delay),
+        ], $options);
+
+        return $topic->publish([
+            'data' => $message->data(),
+            'attributes' => $options,
+        ]);
+    }
+
+      /**
+     * Republish a message onto the queue.
+     *
+     * @param  \Google\Cloud\PubSub\Message  $message
+     * @param  string  $queue
+     * @return mixed
+     */
+    public function republish(Message $message, $queue = null, $options = [], $delay = 0)
+    {
+        $topic = $this->getTopic($this->getQueue($queue));
 
         $options = array_merge([
             'available_at' => (string) $this->availableAt($delay),
