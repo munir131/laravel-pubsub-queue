@@ -175,7 +175,7 @@ class PubSubQueue extends Queue implements QueueContract
             return;
         }
 
-        $this->acknowledge($messages[0], $queue);
+        $this->acknowledge($messages[0]);
 
         if (! empty($messages) && count($messages) > 0) {
             return new PubSubJob(

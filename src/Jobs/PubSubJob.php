@@ -140,7 +140,7 @@ class PubSubJob extends Job implements JobContract
         $this->pubsub->republish(
             $this->job,
             $this->queue,
-            ['attempts' => $attempts],
+            ['attempts' => (string) $attempts],
             $delay
         );
     }
