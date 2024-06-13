@@ -1,8 +1,8 @@
 {
-    "name": "munir131/laravel-pubsub-queue",
+    "name": "lde/laravel-pubsub-queue",
     "description": "Queue driver for Google Cloud Pub/Sub.",
     "keywords": [
-        "munir131",
+        "lde",
         "laravel",
         "queue",
         "gcp",
